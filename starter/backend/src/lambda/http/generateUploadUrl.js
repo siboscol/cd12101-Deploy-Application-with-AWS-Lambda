@@ -5,6 +5,7 @@ import createError from 'http-errors'
 import { todoExistsForUser } from '../../businessLogic/todos.mjs'
 import { createImage, getUploadUrl } from '../../businessLogic/images.mjs'
 import { getUserId } from '../auth/utils.mjs'
+import { v4 as uuidv4 } from 'uuid'
 
 export const handler = middy()
   .use(httpErrorHandler())
@@ -31,7 +32,8 @@ export const handler = middy()
       )
     }
 
-    const newItem = await createImage(todoId, event)
+    const imageId = uuidv4()
+    const newItem = await createImage(todoId, imageId, event)
 
     const url = await getUploadUrl(imageId)
 

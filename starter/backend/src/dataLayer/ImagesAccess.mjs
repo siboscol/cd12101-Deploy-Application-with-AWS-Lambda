@@ -20,12 +20,11 @@ export class ImagesAccess {
     this.bucketName = bucketName
     this.urlExpiration = urlExpiration
     this.dynamoDbClient = DynamoDBDocument.from(this.documentClient)
-    this.s3Client = s3Client = new S3Client()
+    this.s3Client = new S3Client()
   }
 
-  async createImage(todoId, newImage) {
+  async createImage(todoId, imageId, newImage) {
     const timestamp = new Date().toISOString()
-    const imageId = uuidv4()
 
     const newItem = {
       todoId,
@@ -40,7 +39,7 @@ export class ImagesAccess {
         TableName: imagesTable,
         Item: newItem,
       })
-      logger.info(`Stored new image with id ${imageId}`, { newImage, imageId, bucketName: this.bucketNames })
+      logger.info(`Stored new image with id ${imageId}`, { newImage, imageId, bucketName: this.bucketName })
       return newItem
     } catch (error) {
       logger.error(`Error while storing new image with id ${imageId} to s3 bucket ${this.bucketName}`, { imageId, bucketName: this.bucketName, error: error.message })
