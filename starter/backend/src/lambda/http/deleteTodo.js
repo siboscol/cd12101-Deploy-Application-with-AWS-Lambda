@@ -4,6 +4,9 @@ import httpErrorHandler from '@middy/http-error-handler'
 import { getUserId } from '../auth/utils.mjs'
 import { deleteTodo, todoExistsForUser } from '../../businessLogic/todos.mjs'
 import createError from 'http-errors'
+import { createLogger } from '../../utils/logger.mjs'
+
+const logger = createLogger('delete-todo')
 
 export const handler = middy()
   .use(httpErrorHandler())
@@ -30,6 +33,7 @@ export const handler = middy()
     }
 
     await deleteTodo(todoId, userId)
+    logger.info(`Deleted successfully todo with id ${todoId}`)
 
     return {
       statusCode: 204

@@ -2,7 +2,7 @@ import middy from '@middy/core'
 import cors from '@middy/http-cors'
 import httpErrorHandler from '@middy/http-error-handler'
 import { getAllTodos } from '../../businessLogic/todos.mjs'
-import { getToken, getUserId, parseUserId } from '../auth/utils.mjs'
+import { getUserId } from '../auth/utils.mjs'
 
 export const handler = middy()
   .use(httpErrorHandler())

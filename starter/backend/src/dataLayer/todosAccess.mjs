@@ -19,18 +19,7 @@ export class TodosAccess {
 
   async getAllTodosByUser(userId) {
     try {
-      // Fetch data from DynamoDB table - To query an index you need to use the query() method like:
-      // await this.dynamoDbDocument
-      // .query({
-      //   TableName: 'table-name',
-      //   IndexName: 'index-name',
-      //   KeyConditionExpression: 'paritionKey = :paritionKey',
-      //   ExpressionAttributeValues: {
-      //     ':paritionKey': partitionKeyValue
-      //   }
-      // })
-      // .promise()
-
+      // To query an index you need to use the query() method
       const result = await this.dynamoDbClient
         .query({
           TableName: this.todosTable,
@@ -50,25 +39,27 @@ export class TodosAccess {
   }
 
   async createTodo(todo) {
+    logger.info(`Received todo before writing at db`, { todo })
     try {
       await this.dynamoDbClient.put({
         TableName: this.todosTable,
         Item: todo
       })
-      logger.info(`Created todo with id ${todo.id}`, { todo })
+      logger.info(`Created todo with id ${todo.todoId}`, { todo })
       return todo
     } catch (error) {
-      logger.error(`Error while creating todo with id ${todo.id}`, { error: error.message, todo })
+      logger.error(`Error while creating todo with id ${todo.todoId}`, { todo, error: error.message, todo })
       throw error
     }
   }
 
-  async updateTodo(todo, todoId) {
+  async updateTodo(todo, todoId, userId) {
     try {
       await this.dynamoDbClient.update({
         TableName: this.todosTable,
         Key: {
-          todoId,
+          userId,
+          todoId
         },
         UpdateExpression: 'set dueDate = :dueDate, done = :done',
         ExpressionAttributeValues: {
@@ -84,16 +75,16 @@ export class TodosAccess {
     }
   }
 
-  async deleteTodo(todoId) {
+  async deleteTodo(todoId, userId) {
     try {
       await this.dynamoDbClient.delete({
         TableName: this.todosTable,
         Key: {
           todoId,
-        },
+          userId
+        }
       })
       logger.info(`Deleted todo with id ${todoId}`)
-      return todo
     } catch (error) {
       logger.error(`Error while deleting todo with id ${todoId}`, { error: error.message })
       throw error
@@ -101,18 +92,17 @@ export class TodosAccess {
   }
 
   async todoExistsForUser(todoId, userId) {
-    logger.info(`Cchecking if todo with id ${todoId} belong to user ${userId}`, { todoId, userId })
+    logger.info(`Checking if todo with id ${todoId} belong to user ${userId}`, { todoId, userId })
     try {
       const result = await this.dynamoDbClient.get({
         TableName: this.todosTable,
         Key: {
           todoId,
-        },
+          userId
+        }
       })
-      if (!result.Item) {
-        return false
-      }
-      return result.Item.userId === userId
+      logger.info(`Found a todo with id ${todoId}`, { todoId, userId, result })
+      return !!result.Item
     } catch (error) {
       logger.error(`Error while checking if todo with id ${todoId} belong to user ${userId}`, { error: error.message })
       throw error

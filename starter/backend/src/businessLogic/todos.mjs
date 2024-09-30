@@ -21,12 +21,12 @@ export async function createTodo(createTodoRequest, userId) {
   })
 }
 
-export async function updateTodo(updatedTodo, todoId) {
-  return await todosAccess.updateTodo(updatedTodo, todoId)
+export async function updateTodo(updatedTodo, todoId, userId) {
+  return await todosAccess.updateTodo(updatedTodo, todoId, userId)
 }
 
-export async function deleteTodo(todoId) {
-  return await todosAccess.deleteTodo(todoId)
+export async function deleteTodo(todoId, userId) {
+  return await todosAccess.deleteTodo(todoId, userId)
 }
 
 export async function todoExistsForUser(todoId, userId) {

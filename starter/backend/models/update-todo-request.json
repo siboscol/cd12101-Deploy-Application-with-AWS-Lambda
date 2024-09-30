@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "todo",
+  "title": "update-todo",
   "type": "object",
   "properties": {
     "name": {
@@ -15,7 +15,7 @@
   },
   "required": [
     "name",
-    "date",
+    "dueDate",
     "done"
   ],
   "additionalProperties": false

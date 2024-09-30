@@ -3,6 +3,9 @@ import cors from '@middy/http-cors'
 import httpErrorHandler from '@middy/http-error-handler'
 import { getUserId } from '../auth/utils.mjs'
 import { updateTodo, todoExistsForUser } from '../../businessLogic/todos.mjs'
+import { createLogger } from '../../utils/logger.mjs'
+
+const logger = createLogger('update-todo')
 
 export const handler = middy()
   .use(httpErrorHandler())
@@ -30,7 +33,8 @@ export const handler = middy()
     }
     
     // Updates a TODO item with the provided id and using the "updatedTodo" object
-    await updateTodo(updatedTodo, todoId)
+    logger.info(`Received todo from user ${userId} to update`, { todo: updatedTodo })
+    await updateTodo(updatedTodo, todoId, userId)
 
     return {
       statusCode: 200,
