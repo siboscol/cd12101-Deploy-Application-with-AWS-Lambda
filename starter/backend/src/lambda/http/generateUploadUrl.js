@@ -3,7 +3,7 @@ import cors from '@middy/http-cors'
 import httpErrorHandler from '@middy/http-error-handler'
 import createError from 'http-errors'
 import { todoExistsForUser } from '../../businessLogic/todos.mjs'
-import { createImage, getUploadUrl } from '../../businessLogic/images.mjs'
+import { updateTodoAttachmentUrl, getUploadUrl } from '../../businessLogic/images.mjs'
 import { getUserId } from '../auth/utils.mjs'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -33,7 +33,7 @@ export const handler = middy()
     }
 
     const imageId = uuidv4()
-    const newItem = await createImage(todoId, imageId, event)
+    const newItem = await updateTodoAttachmentUrl(imageId, todoId, userId)
 
     const url = await getUploadUrl(imageId)
 

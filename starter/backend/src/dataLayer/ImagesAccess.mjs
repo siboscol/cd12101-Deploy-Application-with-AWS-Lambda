@@ -3,7 +3,6 @@ import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import AWSXRay from 'aws-xray-sdk-core'
-import { v4 as uuidv4 } from 'uuid'
 import { createLogger } from '../utils/logger.mjs'
 
 const logger = createLogger('ImagesAccess')
@@ -11,41 +10,16 @@ const logger = createLogger('ImagesAccess')
 export class ImagesAccess {
   constructor(
     documentClient = AWSXRay.captureAWSv3Client(new DynamoDB()),
-    imagesTable = process.env.IMAGES_TABLE,
+    todosTable = process.env.TODOS_TABLE,
     bucketName = process.env.IMAGES_S3_BUCKET,
     urlExpiration = parseInt(process.env.SIGNED_URL_EXPIRATION)
   ) {
     this.documentClient = documentClient
-    this.imagesTable = imagesTable
+    this.todosTable = todosTable
     this.bucketName = bucketName
     this.urlExpiration = urlExpiration
     this.dynamoDbClient = DynamoDBDocument.from(this.documentClient)
     this.s3Client = new S3Client()
-  }
-
-  async createImage(todoId, imageId, newImage) {
-    const timestamp = new Date().toISOString()
-
-    const newItem = {
-      todoId,
-      timestamp,
-      imageId,
-      imageUrl: `https://${this.bucketName}.s3.amazonaws.com/${imageId}`,
-      ...newImage
-    }
-
-    try {
-      await this.dynamoDbClient.put({
-        TableName: imagesTable,
-        Item: newItem,
-      })
-      logger.info(`Stored new image with id ${imageId}`, { newImage, imageId, bucketName: this.bucketName })
-      return newItem
-    } catch (error) {
-      logger.error(`Error while storing new image with id ${imageId} to s3 bucket ${this.bucketName}`, { imageId, bucketName: this.bucketName, error: error.message })
-      throw error
-    }
-
   }
 
   async getUploadUrl(imageId) {
@@ -61,6 +35,28 @@ export class ImagesAccess {
       return url
     } catch (error) {
       logger.error(`Error while creating signed url for image with id ${imageId}`, { imageId, error: error.message })
+      throw error
+    }
+  }
+
+  async updateTodoAttachmentUrl(imageId, todoId, userId) {
+    const attachmentUrl = `https://${this.bucketName}.s3.amazonaws.com/${imageId}`
+    try {
+      await this.dynamoDbClient.update({
+        TableName: this.todosTable,
+        Key: {
+          userId,
+          todoId
+        },
+        UpdateExpression: 'set attachmentUrl = :attachmentUrl',
+        ExpressionAttributeValues: {
+          ':attachmentUrl': attachmentUrl,
+        },
+        ReturnValues: 'NONE',
+      })
+      logger.info(`Updated todo with id ${todoId}`, { attachmentUrl })
+    } catch (error) {
+      logger.error(`Error while updating todo with id ${todoId}`, { error: error.message })
       throw error
     }
   }
