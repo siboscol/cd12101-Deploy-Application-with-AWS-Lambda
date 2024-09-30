@@ -21,13 +21,14 @@ export const handler = middy()
 
     const authorization = event.headers.Authorization
     const userId = getUserId(authorization)
+    logger.info(`Received todo from user ${userId}`, { todo: newTodo })
 
-    const newItem = await createTodo(newTodo, userId)
+    const todoCreated = await createTodo(newTodo, userId)
 
     return {
       statusCode: 201,
-     body: JSON.stringify({
-        newItem
+      body: JSON.stringify({
+        item: todoCreated
       })
     }
   })
