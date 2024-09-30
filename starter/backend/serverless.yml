@@ -85,6 +85,7 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:UpdateItem
+          - dynamodb:GetItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: "Allow"
         Action:
@@ -105,6 +106,7 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:DeleteItem
+          - dynamodb:GetItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: "Allow"
         Action:
@@ -121,13 +123,13 @@ functions:
           authorizer: Auth
           path: todos/{todoId}/attachment
           cors: true
-          request:
-            schemas:
-              application/json: ${file(models/create-image-request.json)}
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:DeleteItem
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+          - s3:PutObject
+          - s3:GetObject
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
       - Effect: "Allow"
         Action:
